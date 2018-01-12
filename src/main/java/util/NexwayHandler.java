@@ -155,7 +155,7 @@ public class NexwayHandler extends DefaultHandler {
 
         if(bname){
             //System.out.println("Product: "+ new String(ch,start,length));
-            itemName = new String(ch,start,length).replace(":","-");
+            itemName = new String(ch,start,length).replace(":","-").trim();
             productDetail = itemName+" - "+itemID;
             //System.out.println(itemName+" - "+itemID);
             File gameFolder = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail);
@@ -168,32 +168,32 @@ public class NexwayHandler extends DefaultHandler {
         }
 
         if(bdesc){
-            itemDescription = new String(ch,start,length);
+            itemDescription = new String(ch,start,length).trim();
             //System.out.println(itemDescription);
             bdesc = false;
         }
 
         if(bprice){
-            itemSellPrice = new String(ch,start,length);
+            itemSellPrice = new String(ch,start,length).trim();
             //System.out.println(itemSellPrice);
             //System.out.println(new String(ch,start,length));
             bprice = false;
         }
 
         if(bpromostart){
-            itemPromoStartDate = new String(ch,start,length);
+            itemPromoStartDate = new String(ch,start,length).trim();
             //System.out.println(new String(ch,start,length));
             bpromostart = false;
         }
 
         if(bpromoend){
-            itemPromoEndDate = new String(ch,start,length);
+            itemPromoEndDate = new String(ch,start,length).trim();
             //System.out.println(new String(ch,start,length));
             bpromoend = false;
         }
 
         if(bpromoprice){
-            itemPromoPrice = new String(ch, start, length).toString();
+            itemPromoPrice = new String(ch, start, length).trim();
             //System.out.println(new String(ch, start, length));
             if(!itemPromoPrice.equals(itemSellPrice)) {
                 //System.out.println(itemPromoPrice);
@@ -202,7 +202,7 @@ public class NexwayHandler extends DefaultHandler {
         }
 
         if(bpublisher){
-            itemPublisher = new String(ch, start, length).toString();
+            itemPublisher = new String(ch, start, length).trim();
             //System.out.println(itemPublisher);
             bpublisher = false;
         }
