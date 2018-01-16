@@ -19,24 +19,24 @@ public class NexwayHandler extends DefaultHandler {
 
     private Stack<Item> objectStack = new Stack<Item>();
 
-    boolean bname = false;
-    boolean bprice = false;
-    boolean bpromoprice = false;
-    boolean bpromostart = false;
-    boolean bpromoend = false;
-    boolean bpublisher = false;
-    boolean bdesc = false;
+    private boolean bname = false;
+    private boolean bprice = false;
+    private boolean bpromoprice = false;
+    private boolean bpromostart = false;
+    private boolean bpromoend = false;
+    private boolean bpublisher = false;
+    private boolean bdesc = false;
 
-    String itemID = "";
-    String itemName = "";
-    String itemDescription = "";
-    String itemSellPrice = "";
-    String itemPromoPrice = "";
-    String itemPromoStartDate ="";
-    String itemPromoEndDate = "";
-    String itemPublisher ="";
+    private String itemID = "";
+    private String itemName = "";
+    private String itemDescription = "";
+    private String itemSellPrice = "";
+    private String itemPromoPrice = "";
+    private String itemPromoStartDate ="";
+    private String itemPromoEndDate = "";
+    private String itemPublisher ="";
 
-    String productDetail = "";
+    private String productDetail = "";
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
@@ -167,7 +167,7 @@ public class NexwayHandler extends DefaultHandler {
         }
 
     }
-    
+
     public void characters(char ch[], int start, int length) throws SAXException{
 
         if(bname){

@@ -39,7 +39,6 @@ public class SAXMLParser {
 
             NexwayParser parser = new NexwayParser();
             ArrayList<Item> items = parser.parseXml(new InputSource(Config.feedURL));
-            //System.out.println(items);
 
 
         }catch (Exception e){

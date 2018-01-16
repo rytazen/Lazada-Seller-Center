@@ -2,3 +2,5 @@
 src/main/java/config/Config.java
 .idea
 Lazada-Seller-Center.iml
+/src/main/java/CreateProductTest.java
+/src/main/java/util/DOMParser.java
