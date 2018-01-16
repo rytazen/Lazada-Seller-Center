@@ -1,15 +1,24 @@
 package util;
 
+import entity.Item;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.*;
+import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Stack;
 
 public class NexwayHandler extends DefaultHandler {
+
+    private ArrayList<Item> itemList = new ArrayList<Item>();
+
+    private Stack<String> elementStack = new Stack<String>(); //targets a single product
+
+    private Stack<Item> objectStack = new Stack<Item>();
+
     boolean bname = false;
     boolean bprice = false;
     boolean bpromoprice = false;
@@ -29,53 +38,57 @@ public class NexwayHandler extends DefaultHandler {
 
     String productDetail = "";
 
-    BufferedWriter bw = null;
-    FileWriter fw = null;
-    PrintWriter pw = null;
-    FileOutputStream fos = null;
-
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        //System.out.println("Start of element: "+qName);
-        if(qName.equalsIgnoreCase("product")){
-            itemID = attributes.getValue("id");
-            //System.out.println(itemID);
+
+        this.elementStack.push(qName);
+        //System.out.println("CurrElement:"+ currentElement());
+        if(qName.equals("product")){
+            Item item = new Item();
+            if(attributes != null && attributes.getLength() >0 ) {
+                itemID = attributes.getValue("id");
+
+                if (item != null) {
+                    item.setItemID(itemID);
+                }
+            }
+            this.objectStack.push(item);
         }
 
-        if(qName.equalsIgnoreCase("name")){
+        if(qName.equals("name")){
             bname = true;
         }
 
-        if(qName.equalsIgnoreCase("publisher")){
+        if(qName.equals("publisher")){
             bpublisher = true;
         }
 
 
-        if(qName.equalsIgnoreCase("description")){
+        if(qName.equals("description")){
             if(attributes.getValue("format").equals("long") && attributes.getValue("language").equals("EN")){
                 bdesc = true;
             }
         }
 
-        if(qName.equalsIgnoreCase("public")){
+        if(qName.equals("public")){
             if(attributes.getValue("VATInclusive").equals("1")){
                 bprice = true;
             }
         }
 
-        if(qName.equalsIgnoreCase("startDatePromo")){
+        if(qName.equals("startDatePromo")){
             bpromostart = true;
-            if(qName.equalsIgnoreCase("sale")){
+            if(qName.equals("sale")){
                 if(attributes.getValue("VATInclusive").equals("1")){
                     bpromoprice = true;
                 }
             }
         }
 
-        if(qName.equalsIgnoreCase("endDatePromo")){
+        if(qName.equals("endDatePromo")){
             bpromoend = true;
         }
 
-        if(qName.equalsIgnoreCase("sale")){
+        if(qName.equals("sale")){
             if(attributes.getValue("VATInclusive").equals("1")){
                 bpromoprice = true;
             }
@@ -84,12 +97,10 @@ public class NexwayHandler extends DefaultHandler {
 
     public void endElement(String uri, String localName, String qName)throws SAXException {
 
-        if (qName.equalsIgnoreCase("product")) {
-            //System.out.println(productDetail);
+        this.elementStack.pop();
 
-        }
 
-        if (qName.equalsIgnoreCase("description")) {
+        if (qName.equals("description")) {
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail + "/description.html");
                 if (file.createNewFile()) {
@@ -101,7 +112,7 @@ public class NexwayHandler extends DefaultHandler {
             }
         }
 
-        if(qName.equalsIgnoreCase("public")){
+        if(qName.equals("public")){
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail+"/publicPrice.txt");
                 if(file.createNewFile()){
@@ -113,7 +124,7 @@ public class NexwayHandler extends DefaultHandler {
             }
         }
 
-        if(qName.equalsIgnoreCase("startDatePromo")){
+        if(qName.equals("startDatePromo")){
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail+"/startDatePromo.txt");
                 if(file.createNewFile()){
@@ -125,7 +136,7 @@ public class NexwayHandler extends DefaultHandler {
             }
         }
 
-        if(qName.equalsIgnoreCase("endDatePromo")){
+        if(qName.equals("endDatePromo")){
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail+"/endDatePromo.txt");
                 if(file.createNewFile()){
@@ -137,25 +148,36 @@ public class NexwayHandler extends DefaultHandler {
             }
         }
 
-        if(qName.equalsIgnoreCase("sale")){
+        if(qName.equals("sale")) {
             try {
-                File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail+"/promoPrice.txt");
-                if(file.createNewFile()){
+                File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail + "/promoPrice.txt");
+                if (file.createNewFile()) {
                     //System.out.println(file +" created successful!");
                 }
                 Files.write(Paths.get("\\Users\\yeecheng.intern\\Desktop\\Lazada Games Folder\\" + productDetail + "\\promoPrice.txt"), itemPromoPrice.getBytes());
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
+        if (qName.equals("product")) {
+            //System.out.println(productDetail);
+            Item item = this.objectStack.pop();
+            this.itemList.add(item);
+        }
+
     }
-
-
+    
     public void characters(char ch[], int start, int length) throws SAXException{
 
         if(bname){
             //System.out.println("Product: "+ new String(ch,start,length));
             itemName = new String(ch,start,length).replace(":","-").trim();
+
+            Item item = this.objectStack.peek();
+            item.setItemName(itemName);
+
+            //System.out.println("This object is : " +this.objectStack.peek().itemName);
             productDetail = itemName+" - "+itemID;
             //System.out.println(itemName+" - "+itemID);
             File gameFolder = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail);
@@ -170,6 +192,10 @@ public class NexwayHandler extends DefaultHandler {
         if(bdesc){
             itemDescription = new String(ch,start,length).trim();
             //System.out.println(itemDescription);
+            Item item = this.objectStack.peek();
+            item.setItemDescription(itemDescription);
+            //System.out.println(item.getItemDescription());
+            //System.out.println(item.getItemDescription());
             bdesc = false;
         }
 
@@ -177,18 +203,25 @@ public class NexwayHandler extends DefaultHandler {
             itemSellPrice = new String(ch,start,length).trim();
             //System.out.println(itemSellPrice);
             //System.out.println(new String(ch,start,length));
+            Item item = this.objectStack.peek();
+            item.setSellPrice(itemSellPrice);
+            //System.out.println("This object is : " +this.objectStack.peek());
             bprice = false;
         }
 
         if(bpromostart){
             itemPromoStartDate = new String(ch,start,length).trim();
             //System.out.println(new String(ch,start,length));
+            Item item = this.objectStack.peek();
+            item.setPromoStartDate(itemPromoStartDate);
             bpromostart = false;
         }
 
         if(bpromoend){
             itemPromoEndDate = new String(ch,start,length).trim();
             //System.out.println(new String(ch,start,length));
+            Item item = this.objectStack.peek();
+            item.setPromoEndDate(itemPromoEndDate);
             bpromoend = false;
         }
 
@@ -196,6 +229,8 @@ public class NexwayHandler extends DefaultHandler {
             itemPromoPrice = new String(ch, start, length).trim();
             //System.out.println(new String(ch, start, length));
             if(!itemPromoPrice.equals(itemSellPrice)) {
+                Item item = this.objectStack.peek();
+                item.setPromoPrice(itemPromoPrice);
                 //System.out.println(itemPromoPrice);
                 bpromoprice = false;
             }
@@ -204,7 +239,20 @@ public class NexwayHandler extends DefaultHandler {
         if(bpublisher){
             itemPublisher = new String(ch, start, length).trim();
             //System.out.println(itemPublisher);
+            Item item = this.objectStack.peek();
+            item.setPublisher(itemPublisher);
+            //System.out.println("This object is : " +this.objectStack.peek());
             bpublisher = false;
         }
+    }
+
+    private String currentElement()
+    {
+        return this.elementStack.peek();
+    }
+
+    public ArrayList<Item> getItems()
+    {
+        return itemList;
     }
 }

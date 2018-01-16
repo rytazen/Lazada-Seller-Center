@@ -11,6 +11,9 @@ public class Item {
     public String promoEndDate;
     public String publisher;
 
+    public Item() {
+    }
+
     public Item(String itemID, String itemName, String itemDescription, String sellPrice, String publisher) {
         this.itemID = itemID;
         this.itemName = itemName;
