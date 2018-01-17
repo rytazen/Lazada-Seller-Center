@@ -26,6 +26,7 @@ public class NexwayHandler extends DefaultHandler {
     private boolean bpromoend = false;
     private boolean bpublisher = false;
     private boolean bdesc = false;
+    private boolean bdrm = false;
 
     private String itemID = "";
     private String itemName = "";
@@ -35,13 +36,13 @@ public class NexwayHandler extends DefaultHandler {
     private String itemPromoStartDate ="";
     private String itemPromoEndDate = "";
     private String itemPublisher ="";
+    private String itemDRM = "";
 
     private String productDetail = "";
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
         this.elementStack.push(qName);
-        //System.out.println("CurrElement:"+ currentElement());
         if(qName.equals("product")){
             Item item = new Item();
             if(attributes != null && attributes.getLength() >0 ) {
@@ -93,6 +94,34 @@ public class NexwayHandler extends DefaultHandler {
                 bpromoprice = true;
             }
         }
+
+        if(qName.equals("drm")){
+            Item item = this.objectStack.peek();
+            if(attributes != null && attributes.getLength() > 0){
+                itemDRM = attributes.getValue("id");
+
+                if (item != null) {
+                    item.setItemDRM(itemDRM);
+
+                    if(attributes.getValue("id").equalsIgnoreCase("STEAM")){
+                        item.setItemHighlight("<ul>\n" +
+                                "\t<li>Steam key</li>\t\n" +
+                                "\t<li>Use or create a free Razer ID account to redeem your game</li>\n" +
+                                "\t<li>Instructions on how to activate the game will be sent to your email</li>\n" +
+                                "\t<li>Product once sold is non-refundable or exchangeable</li>\n" +
+                                "</ul>");
+                    } else if (attributes.getValue("id").equalsIgnoreCase("UPLAY")){
+                        item.setItemHighlight("<ul>\n" +
+                                "\t<li>Uplay key</li>\t\n" +
+                                "\t<li>Use or create a free Razer ID account to redeem your game</li>\n" +
+                                "\t<li>Instructions on how to activate the game will be sent to your email</li>\n" +
+                                "\t<li>Product once sold is non-refundable or exchangeable</li>\n" +
+                                "</ul>");
+                    }
+                }
+                bdrm = true;
+            }
+        }
     }
 
     public void endElement(String uri, String localName, String qName)throws SAXException {
@@ -103,9 +132,7 @@ public class NexwayHandler extends DefaultHandler {
         if (qName.equals("description")) {
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail + "/description.html");
-                if (file.createNewFile()) {
-                    //System.out.println(file + " created successful!");
-                }
+
                 Files.write(Paths.get("\\Users\\yeecheng.intern\\Desktop\\Lazada Games Folder\\" + productDetail + "\\description.html"), itemDescription.getBytes());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -115,9 +142,7 @@ public class NexwayHandler extends DefaultHandler {
         if(qName.equals("public")){
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail+"/publicPrice.txt");
-                if(file.createNewFile()){
-                    //System.out.println(file +" created successful!");
-                }
+
                 Files.write(Paths.get("\\Users\\yeecheng.intern\\Desktop\\Lazada Games Folder\\" + productDetail + "\\publicPrice.txt"), itemSellPrice.getBytes());
             }catch (Exception e) {
                 e.printStackTrace();
@@ -127,9 +152,7 @@ public class NexwayHandler extends DefaultHandler {
         if(qName.equals("startDatePromo")){
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail+"/startDatePromo.txt");
-                if(file.createNewFile()){
-                    //System.out.println(file +" created successful!");
-                }
+
                 Files.write(Paths.get("\\Users\\yeecheng.intern\\Desktop\\Lazada Games Folder\\" + productDetail + "\\startDatePromo.txt"), itemPromoStartDate.getBytes());
             }catch (Exception e) {
                 e.printStackTrace();
@@ -139,9 +162,7 @@ public class NexwayHandler extends DefaultHandler {
         if(qName.equals("endDatePromo")){
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail+"/endDatePromo.txt");
-                if(file.createNewFile()){
-                    //System.out.println(file +" created successful!");
-                }
+
                 Files.write(Paths.get("\\Users\\yeecheng.intern\\Desktop\\Lazada Games Folder\\" + productDetail + "\\endDatePromo.txt"), itemPromoEndDate.getBytes());
             }catch (Exception e) {
                 e.printStackTrace();
@@ -151,17 +172,24 @@ public class NexwayHandler extends DefaultHandler {
         if(qName.equals("sale")) {
             try {
                 File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail + "/promoPrice.txt");
-                if (file.createNewFile()) {
-                    //System.out.println(file +" created successful!");
-                }
+
                 Files.write(Paths.get("\\Users\\yeecheng.intern\\Desktop\\Lazada Games Folder\\" + productDetail + "\\promoPrice.txt"), itemPromoPrice.getBytes());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
+        if(qName.equals("drm")){
+            try{
+                File file = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/"+productDetail+"/DRM.txt");
+
+                Files.write(Paths.get("\\Users\\yeecheng.intern\\Desktop\\Lazada Games Folder\\" +productDetail+"\\DRM.txt"),itemDRM.getBytes());
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
         if (qName.equals("product")) {
-            //System.out.println(productDetail);
             Item item = this.objectStack.pop();
             this.itemList.add(item);
         }
@@ -171,15 +199,12 @@ public class NexwayHandler extends DefaultHandler {
     public void characters(char ch[], int start, int length) throws SAXException{
 
         if(bname){
-            //System.out.println("Product: "+ new String(ch,start,length));
             itemName = new String(ch,start,length).replace(":","-").trim();
 
             Item item = this.objectStack.peek();
             item.setItemName(itemName);
 
-            //System.out.println("This object is : " +this.objectStack.peek().itemName);
             productDetail = itemName+" - "+itemID;
-            //System.out.println(itemName+" - "+itemID);
             File gameFolder = new File("/Users/yeecheng.intern/Desktop/Lazada Games Folder/" + productDetail);
             if (!gameFolder.exists()) {
                 if (gameFolder.mkdir()) {
@@ -191,27 +216,20 @@ public class NexwayHandler extends DefaultHandler {
 
         if(bdesc){
             itemDescription = new String(ch,start,length).trim();
-            //System.out.println(itemDescription);
             Item item = this.objectStack.peek();
             item.setItemDescription(itemDescription);
-            //System.out.println(item.getItemDescription());
-            //System.out.println(item.getItemDescription());
             bdesc = false;
         }
 
         if(bprice){
             itemSellPrice = new String(ch,start,length).trim();
-            //System.out.println(itemSellPrice);
-            //System.out.println(new String(ch,start,length));
             Item item = this.objectStack.peek();
             item.setSellPrice(itemSellPrice);
-            //System.out.println("This object is : " +this.objectStack.peek());
             bprice = false;
         }
 
         if(bpromostart){
             itemPromoStartDate = new String(ch,start,length).trim();
-            //System.out.println(new String(ch,start,length));
             Item item = this.objectStack.peek();
             item.setPromoStartDate(itemPromoStartDate);
             bpromostart = false;
@@ -219,7 +237,6 @@ public class NexwayHandler extends DefaultHandler {
 
         if(bpromoend){
             itemPromoEndDate = new String(ch,start,length).trim();
-            //System.out.println(new String(ch,start,length));
             Item item = this.objectStack.peek();
             item.setPromoEndDate(itemPromoEndDate);
             bpromoend = false;
@@ -227,22 +244,22 @@ public class NexwayHandler extends DefaultHandler {
 
         if(bpromoprice){
             itemPromoPrice = new String(ch, start, length).trim();
-            //System.out.println(new String(ch, start, length));
             if(!itemPromoPrice.equals(itemSellPrice)) {
                 Item item = this.objectStack.peek();
                 item.setPromoPrice(itemPromoPrice);
-                //System.out.println(itemPromoPrice);
                 bpromoprice = false;
             }
         }
 
         if(bpublisher){
             itemPublisher = new String(ch, start, length).trim();
-            //System.out.println(itemPublisher);
             Item item = this.objectStack.peek();
             item.setPublisher(itemPublisher);
-            //System.out.println("This object is : " +this.objectStack.peek());
             bpublisher = false;
+        }
+
+        if(bdrm){
+
         }
     }
 

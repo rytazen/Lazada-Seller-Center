@@ -19,12 +19,10 @@ import util.NexwayParser;
 
 import java.io.File;
 import java.lang.management.MemoryManagerMXBean;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class Main {
@@ -40,9 +38,11 @@ public class Main {
         }
 
         NexwayParser parser = new NexwayParser();
-        ArrayList<Item> items = parser.parseXml(new InputSource(Config.feedURL));
+        ArrayList<Item> items = parser.parseXml(new InputSource(Config.feedURL2));
 
-        //System.out.println(items);
+        //System.out.println(items.get(2));
+        //System.out.println();
+        //System.out.println(items.get(74));
 
         LazadaClient.init(Config.url, Config.userId, Config.apiKey);
         //System.out.println(LazadaClient.getDefaultClient());
@@ -125,51 +125,51 @@ public class Main {
 
         //System.out.println(items.get(0));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-DD HH:MM:SS");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-DD");
 
         String gameName = ""+"- DRAFT";
         String brand = "";
         String price = "";
         String specialPrice = "";
+        Date specialFromDate = null;
         String specialFrom = "";
         String specialTo = "";
 
         //construct attributes of product
         Map<String, Object> attributes = new HashMap<String, Object>();
+
+
         attributes.put("warranty_type", "No Warranty");
         attributes.put("is_digital", "Email");
         attributes.put("color_family", "Not Specified");
         attributes.put("Hazmat","None");
-        attributes.put("brand", items.get(5).getPublisher());
-        attributes.put("model", items.get(5).getItemName());
-        attributes.put("name", items.get(5).getItemName());
-        attributes.put("short_description","description short in attribute");
-        //attributes.put("package_width", 1);
-        //attributes.put("package_height", 1);
-        //attributes.put("package_weight", 1);
-        //attributes.put("package_length", 1);
+        attributes.put("brand", items.get(2).getPublisher());
+        attributes.put("model", items.get(2).getItemName());
+        attributes.put("name", items.get(2).getItemName()+" -Draft");
+        attributes.put("short_description",items.get(2).getItemHighlight());
+        attributes.put("description", items.get(2).getItemDescription());
+        //System.out.println(attributes);
 
 
         //construct SKUs
         List<Map<String, Object>> skusList = new ArrayList<>();
         Map<String, Object> sku1 = new HashMap<String, Object>();
-        sku1.put("SellerSku", items.get(5).getItemID());
+
+
+        sku1.put("SellerSku", items.get(2).getItemID());
         sku1.put("quantity",100);
-        sku1.put("package_content", "1 x "+items.get(5).getItemName()+" key");
+        sku1.put("package_content", "1 x "+items.get(2).getItemName()+" key");
         sku1.put("package_height", 1);
         sku1.put("package_width", 1);
         sku1.put("package_weight", 1);
         sku1.put("package_length", 1);
-        sku1.put("price", items.get(3).getSellPrice());
-        //sku1.put("special_from_date",items.get(0).getPromoStartDate());
-        //sku1.put("special_to_date",items.get(0).getPromoEndDate());
-        //sku1.put("special price", items.get(0).getPromoPrice());
-        //sku1.put("short_description","i am in sku!");
-        //sku1.put("name","Beat Cop - Name in SKU");
-        //sku1.put("model","Beat Cop - Model in SKU");
-        //sku1.put("brand","11 bit studios");
-        //sku1.put("short_description", "CreateProduct test");
+        sku1.put("price", items.get(2).getSellPrice());
+        //sku1.put("special_from_date","2018-01-16");
+        //sku1.put("special_to_date","2018-01-23");
+        //sku1.put("special price", items.get(18).getPromoPrice());
         skusList.add(sku1);
+
+        //System.out.println(sku1);
 
         //System.out.println();
         //construct request by categoryId, attributes of product, attributes of sku(s)
